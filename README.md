@@ -121,6 +121,20 @@ Of course, the only caveat you may have to use csdid2 to do the deed, instead of
 csdid2 event, estat
 ```
 
+## Options with estats!
+ok so just small notes on options with -estat- commands.
+
+you can now select not only the type of aggregation (simple event cevent group calendar or pretrend) you want, but also the kind of restrictions you can add to your data
+
+especifically, you have 4 options:
+
+1. `rgroup()`   : you can indicate any specific group or groups to be used for the aggregations (only 1, a list of them, etc)
+2. `rcalendar()`: Similar as before, you can constrain the periods (years) to be used for constraining the data (say only consider information between 1990/2010)
+3. `revent()`   : select only ATTGTs that correspond to particular relative periods (dynamics)
+4. `rebalance()`: Imposes the constrain to ONLY use ATTGTs for groups that were Always present in a given set of periods (say all cohorts observed between -2 to 4). This restricts both groups included in the estimation, as well as relative periods. However, if you also use `revent()`, it will still show you events beyond the restricted sample (in case you were interested in seeing those effects)
+
+
+
 Couple of notes. When using very large samples (many groups/periods/observations) you will need a lot of memory to keep it all in memory.
 In general, you should plan to have atleast:
 

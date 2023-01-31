@@ -45,6 +45,7 @@ end
 					rgroup(numlist)     ///
 					rcalendar(numlist) /// 
 					revent(numlist)    ///
+					REBALance(numlist)    /// <-- restricts groups and event, unless event is used too
 					max_mem(real 1)  plot  * ]
 	
 	// confirm csdid exists and if csdidstat=csdid_estat()
@@ -72,6 +73,7 @@ end
 	mata: csdidstat.range.selgvar = J(0,0,.)
 	mata: csdidstat.range.seltvar = J(0,0,.)
 	mata: csdidstat.range.selevent= J(0,0,.)
+	mata: csdidstat.range.selbal  = J(0,0,.)
 	
 	/// Check if we have to make sample selection
 	
@@ -87,7 +89,12 @@ end
 		 numlist "`revent'", int
 		 mata:csdidstat.range.selevent=csdidstat.rtokens("`r(numlist)'")
 	}
-	
+	if "`rebalance'"!="" {
+		 
+		 numlist "`rebalance'", int
+		 
+		 mata:csdidstat.range.selbal=csdidstat.rtokens("`r(numlist)'")
+	}	
 	if `ktype'>0 		mata: csdidstat.test_type  = `ktype'      
 	else {
 		mata: csdidstat.pretrend(csdid)
@@ -122,7 +129,7 @@ end
 		_coef_table, level(`level')
 		matrix rtb=r(table)
 		
-		if "`post'"=="" qui:est restore `lastreg'
+		if "`post'"=="" qui:capture:est restore `lastreg'
 
 		return matrix table = rtb, copy
 		return local agg  `key'

@@ -1,12 +1,13 @@
+*! v1.1 adds Rolling
 *! v1 Wrapper for CSDID2-Mata version
 
 program csdid2, sortpreserve eclass
         version 14
 		///version checker
 		syntax [anything(everything)] [iw aw pw], [* version estat ///
-													save clear load replace ]
+													save clear load replace plot]
 		if "`save'`clear'`load'`replace'"!="" {
-		    display "Please use csdid2_clean to save, clear, load or replace the csdid file. "
+		    
 		    exit
 		}
 		
@@ -15,6 +16,11 @@ program csdid2, sortpreserve eclass
 			exit
 		}
 
+		if "`plot'"!="" {
+			csdid2_plot, `options'
+			exit
+		}
+		
 		if  "`version'"!="" {
 			display "version: 1"
 			addr scalar version = 1
@@ -42,8 +48,6 @@ end
 
 program define easter_egg
         display "This Easter Egg is Broken, but try not to get lost"
-		
-				
 end
 
 
@@ -79,6 +83,7 @@ end
 							 long long2					    /// to allow for "long gaps"
 							 asinr							/// For pretreatment
 							 agg(string)                    /// type of aggregation
+							 rolljw							/// Rolling Regression Estimator
 							]  
 	** Marking Sample							
 	marksample touse
@@ -120,12 +125,15 @@ end
 	}
 	
 	** Always Treated Excluded
-	*qui:_datasig `touse', fast
-	*local dch `r(datasignature)' 
+	qui: sum `touse', meanonly
+	local pre_mean `r(mean)'
 	sum `tvar' if `touse', meanonly	
 	qui:replace `touse'=0 if `gvar'<`r(min)' & `gvar'>0
-	*qui:_datasig `touse'
-	*if "`dcg'"!="`r(datasignature)'" display "Always Treated units have been excluded"
+	
+	qui: sum `touse', meanonly
+	local post_mean `r(mean)'
+	
+	if `pre_mean'!=`post_mean' display "Always Treated units have been excluded"
 	
 	
 	** is gvar nested iwthing county
@@ -154,15 +162,21 @@ end
 	if "`cvar'"!="" mata:csdid.setup_cvar("`cvar'" ,"`touse'")	
  	** Setup as panel or rc
 	mata:csdid.csdid_setup()
+	
+	** Rolling Regression
+	if "`rolljw'"!="" mata:csdid.rolljw = 1
+	
 	// Type_est  1 dripw 2 drimp 3 stipw 4 reg 
 	// not_yet   0 Never 1 Notyet
 	// shrt      1 short 0 long
 	// asinr     0 stata 1 R
+		
 		 if "`method'"=="dripw"  local type_est=1
 	else if "`method'"=="drimp"  local type_est=2
 	else if "`method'"=="stdipw" local type_est=3
 	else if "`method'"=="reg"    local type_est=4
-	else if "`method'"
+	
+	
 	local ntyet = 0
 	if "`tyet'"!=""  local ntyet = 1
 	local shrt = 1

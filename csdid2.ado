@@ -6,7 +6,7 @@ program csdid2, sortpreserve eclass
 		syntax [anything(everything)] [iw aw pw], [* version estat ///
 													save clear load replace ]
 		if "`save'`clear'`load'`replace'"!="" {
-		    
+		    display "Please use csdid2_clean to save, clear, load or replace the csdid file. "
 		    exit
 		}
 		
@@ -120,12 +120,12 @@ end
 	}
 	
 	** Always Treated Excluded
-	qui:_datasig `touse', fast
-	local dch `r(datasignature)' 
+	*qui:_datasig `touse', fast
+	*local dch `r(datasignature)' 
 	sum `tvar' if `touse', meanonly	
 	qui:replace `touse'=0 if `gvar'<`r(min)' & `gvar'>0
-	qui:_datasig `touse'
-	if "`dcg'"!="`r(datasignature)'" display "Always Treated units have been excluded"
+	*qui:_datasig `touse'
+	*if "`dcg'"!="`r(datasignature)'" display "Always Treated units have been excluded"
 	
 	
 	** is gvar nested iwthing county

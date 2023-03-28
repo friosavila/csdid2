@@ -75,7 +75,7 @@ class drdid {
 	real scalar kx 
 	real scalar minn 
 	real scalar rolljw	
-	
+	real scalar err
 	real matrix select4()
 	// regressions
 	///void    	fipt()
@@ -187,16 +187,16 @@ void drdid::ols(real matrix sw, ixx ){
  
  
 /// Setting Data UP
-
+ 
 void drdid::msetup_panel(){
 	// assume data is sorted
 	// makeid to ID balance panel
 	// expands current ID
-	
+	err = 0 
 	makeid()
 	// keeps only those with 2 observations
 	tmt  = tmt :==max(tmt) ; 	trt  = trt :==max(trt)
-	
+
 	yvar = select(yvar,(id[,2]:==2))
 	kx   = cols(xvar)	
 	if (kx>0) {
@@ -244,7 +244,8 @@ void drdid::msetup_panel(){
 	
 	yvar = select(yvar,(tmt:==1)):-select(yvar,(tmt:==0))
 	nn   = rows(yvar)
- 
+ 	
+	if (rows(yvar)==0) err=1
 }
 
 // For Rolling Regressions
@@ -255,6 +256,7 @@ void drdid::msetup_panel2(){
 	// assume data is sorted
 	// makeid to ID balance panel
 	// expands current ID	
+	err = 0 
 
 	makeid()
 	// keeps only those with 2 observations
@@ -315,7 +317,9 @@ void drdid::msetup_panel2(){
  	
 	yvar = yvar_post :-yvar_pre
 	nn   = rows(yvar)
- 
+	
+ 	if (rows(yvar)==0) err=1
+
 }
  
 // Data setup
@@ -324,6 +328,7 @@ void drdid::msetup_rc(){
 	// makeid to ID balance panel
 	// expands current ID
 	// makeid2()
+	err=0
 	oid=id
 	id=1::rows(id)	
 	// keeps only those with 2 observations
@@ -342,6 +347,8 @@ void drdid::msetup_rc(){
 	wvar = wvar:/mean(wvar)
 	nn   = rows(yvar)
 	
+	//if min( uniqrows(tmt_trt,1))[,2] ==0 ) err =1
+
 }
 
 real matrix drdid::select4(){
@@ -1039,17 +1046,19 @@ void drdid::setup2(real scalar dt, real scalar mt){
 // This IMPLEMENTS DRDID
 void drdid::drdid(){
 	// setup2(dt,mt)
-
+	// IF N=0 NOT CONVERGED. eRROR
 	if (data_type == 1) {
 		
 		if (rolljw==0)      msetup_panel()  
 		else if (rolljw==1) msetup_panel2()  
 		
-			 if (method_type ==1) dripw_panel()
-		else if (method_type ==2) drimp_panel()
-		else if (method_type ==3) stdipw_panel()
-		else if (method_type ==4) reg_panel()
- 
+		if (err ==0) {
+				 if (method_type ==1) dripw_panel()
+			else if (method_type ==2) drimp_panel()
+			else if (method_type ==3) stdipw_panel()
+			else if (method_type ==4) reg_panel()
+		}
+		else conv=0
 	}
 	else {
 

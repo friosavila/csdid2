@@ -1,3 +1,5 @@
+*! v1.01 csdid2_plot for csdid2 only
+ 
 program csdid2_plot, rclass
 
 	syntax, [* ktype(string)]
@@ -29,8 +31,8 @@ program csdid2_plot_wh
 	tempname tbl
 	matrix `tbl'=`table'
 	capture: confirm matrix `tbl'
- 
-	if det(`tbl')==. matrix `tbl'=rtb
+	
+	*if det(`tbl')==. matrix `tbl'=rtb
 	
 	if `ktype'==5 {
 		tempvar t b ll uu
@@ -173,40 +175,3 @@ program csdid_plot_other
 	
 end
 
-mata:
- 	void event_p( string scalar newvars, string scalar tblx){
-	    real   matrix tbl, ntbl2
-		string matrix ntbl
-	    tbl = st_matrix(tblx)	
-		 
-		ntbl = st_matrixcolstripe(tblx)
-		ntbl = usubinstr(ntbl,"tp","+",.)
-		ntbl = usubinstr(ntbl,"tm","-",.)	
-		ntbl2= strtoreal(ntbl)	
-		tbl  = tbl[(1,5,6),]'	
-		tbl  = select(tbl,(ntbl2[,2]:!=.))		
-		ntbl2= select(ntbl2[,2],(ntbl2[,2]:!=.))
-        real matrix ss
- 		ss= _st_addvar("double",tokens(newvars))
- 		st_store((1::rows(tbl)) ,tokens(newvars),(ntbl2,tbl))	
-	}
- 
-	void other_p(string scalar newvars, string scalar tblx){
-	    real   matrix tbl
-		string matrix ntbl
-	    tbl  = st_matrix(tblx)		
-		ntbl = st_matrixcolstripe(tblx)
-		//ntbl = usubinstr(ntbl,"g","",.)
-		//ntbl = usubinstr(ntbl,"t","",.)
-		ntbl = ntbl [,2]
-		tbl  = tbl[(1,5,6),]'	
-		string matrix tnv
-		tnv = tokens(newvars)
-		real matrix ss
-		ss= _st_addvar(sprintf("str%f",max(strlen(ntbl))),tnv[1])
-		ss= _st_addvar("double",tnv[2..4])
-		st_sstore((1::rows(tbl)) ,tnv[1],ntbl)	
-		st_store((1::rows(tbl)) ,tnv[2..4],tbl)	
-	}
-end
- 

@@ -18,7 +18,7 @@ end
 
  program define csdid2_estat, sortpreserve    
 	version 14
-		syntax anything, [*]
+		syntax anything, [* plot]
         capture mata:csdid
 		if _rc!=0   error 301
  		gettoken key rest : 0, parse(", ")
@@ -27,6 +27,7 @@ end
 			csdid_do `key' `rest'
 			addr local cmd  estat
 			addr local cmd2 csdid2
+			if "`plot'"!="" csdid2_plot ,  ktype(`ktype') `options'
 		}
 		else if inlist("`key'","plot") {
 			csdid2_plot, `options'
@@ -162,22 +163,21 @@ end
 		csdid_tablex, `diopts' level(`level')	
 		display "WildBootstrap Standard errors"	_n ///
 				"with `reps' Repetitions"
-		matrix rtb = r(table)
-		
- 
+		tempname	rtb 	
+		matrix `rtb' = r(table)
 	
 		if "`post'"=="" capture:qui:est restore `lastreg'
-		return matrix table = rtb, copy
+		return matrix table = `rtb', copy
 		return local agg  `key'
 		
 	}
 
 	return local cmd csdid2_estat
 		
-	if "`plot'"!="" {	    
-	    csdid2_plot ,  ktype(`ktype') `options'
-	}
-	capture matrix drop rtb 
+	*if "`plot'"!="" {	    
+	*    csdid2_plot ,  ktype(`ktype') `options'
+	*}
+	*capture matrix drop rtb 
 end
  
 program define  tsvmat2, return

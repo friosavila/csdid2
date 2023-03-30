@@ -1,3 +1,8 @@
+Thank you for Following this
+Im moving this repository to a more general one. So this one will no longer updated
+
+https://github.com/friosavila/stpackages/tree/main/csdid2
+
 # csdid2
 New Version of CSDID. All in Mata
 
